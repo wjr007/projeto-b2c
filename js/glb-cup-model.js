@@ -364,13 +364,6 @@ export class GlbCupModel {
           const x1 = posAttr.getX(i1), z1 = posAttr.getZ(i1);
           const x2 = posAttr.getX(i2), z2 = posAttr.getZ(i2);
 
-          const r0 = Math.sqrt(x0 * x0 + z0 * z0);
-          const r1 = Math.sqrt(x1 * x1 + z1 * z1);
-          const r2 = Math.sqrt(x2 * x2 + z2 * z2);
-
-          // 2. Discard all internal ledge and lid scan fragments from the raw GLB model
-          if (yAvg > 0.65 && (r0 < 0.268 || r1 < 0.268 || r2 < 0.268)) continue;
-
           let u0 = Math.atan2(x0, z0) / (2 * Math.PI) + 0.5;
           let u1 = Math.atan2(x1, z1) / (2 * Math.PI) + 0.5;
           let u2 = Math.atan2(x2, z2) / (2 * Math.PI) + 0.5;
