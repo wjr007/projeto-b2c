@@ -9,7 +9,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { TumblerTextureGenerator } from './texture-generator.js';
-import { TumblerCupModel } from './cup-model.js';
+import { GlbCupModel } from './glb-cup-model.js';
 import { StudioScene } from './studio-scene.js';
 
 class TumblerProductApp {
@@ -18,10 +18,16 @@ class TumblerProductApp {
     this.isPlaying = false; // Manual 360° interaction by default
     this.currentAngleDeg = 0;
     this.targetAngleDeg = null;
-    this.rotationSpeed = 0.4; // Deg per frame for auto-spin
+    this.targetPolarRad = null;
+    this.rotationSpeed = 0.65; // Matches smooth photographic turntable speed
 
     this.variationNames = {
+      copa: 'Brasil Hexa (Edição Copa 360°)',
+      rubroNegro: 'Rubro-Negro CRF (Edição Especial)',
       cargill: 'Verde Cargill (Edição Oficial)',
+      luxuryBotanical: 'Botânico Luxo & Ouro',
+      cyberAurora: 'Aurora Neon Cyberpunk',
+      goldMarble: 'Mármore Calacatta & Ouro',
       matteBlack: 'Preto Fosco',
       glossWhite: 'Branco Neve',
       navyBlue: 'Azul Marinho',
@@ -34,35 +40,34 @@ class TumblerProductApp {
 
   async init() {
     try {
-      this.updateLoading('Inicializando texturas de estúdio...', 35);
+      this.updateLoading('Inicializando texturas de estúdio...', 30);
 
       // 1. Generate dynamic 4K cylindrical texture
       this.textureGen = new TumblerTextureGenerator({ width: 4096, height: 2048 });
       this.bodyTexture = this.textureGen.generateTexture(THREE);
 
-      this.updateLoading('Construindo modelo 3D do copo com parede dupla...', 70);
+      this.updateLoading('Carregando modelo 3D real (travel mug 3d model.glb)...', 65);
 
-      // 2. Build physical tumbler 3D model
-      this.cupModel = new TumblerCupModel(THREE, this.bodyTexture);
-
-      this.updateLoading('Configurando iluminação de estúdio fotográfico...', 90);
-
-      // 3. Initialize studio environment and camera
+      // 2. Initialize studio environment and camera
       this.studioScene = new StudioScene(this.canvas, THREE, OrbitControls);
+
+      // 3. Load user's real GLB 3D model (strictly WITHOUT LID)
+      this.cupModel = new GlbCupModel(THREE, this.bodyTexture, () => {
+        this.cupModel.setVariation('copa');
+        this.updateLoading('Modelo 3D real pronto!', 100);
+        this.hideLoading();
+      });
       this.studioScene.scene.add(this.cupModel.group);
 
       // 4. Wire interactive UI controls
       this.setupConfiguratorEvents();
       this.setupViewerControls();
 
-      // 5. Hide loading overlay
-      this.hideLoading();
-
-      // 6. Start animation loop
+      // 5. Start animation loop
       this.animate = this.animate.bind(this);
       requestAnimationFrame(this.animate);
 
-      console.log('TumblerProductApp initialized successfully.');
+      console.log('TumblerProductApp initialized successfully with GLB model.');
     } catch (err) {
       console.error('Initialization error:', err);
       this.showError(err.message || 'Falha ao inicializar o ambiente 3D.');
@@ -201,6 +206,7 @@ class TumblerProductApp {
     if (this.studioScene.controls) {
       this.studioScene.controls.addEventListener('start', () => {
         this.targetAngleDeg = null;
+        this.targetPolarRad = null;
         if (this.isPlaying) {
           this.setPlayState(false);
         }
@@ -214,15 +220,33 @@ class TumblerProductApp {
       });
     }
 
-    // Perspective Quick Chips (0°, 90°, 180°, 270°)
+    // Perspective Quick Chips (0°, 90°, 180°, 270°, Ver Fundo)
     const chips = document.querySelectorAll('.chip-btn');
     chips.forEach((chip) => {
       chip.addEventListener('click', () => {
         chips.forEach((c) => c.classList.remove('active'));
         chip.classList.add('active');
 
-        const target = parseFloat(chip.getAttribute('data-angle'));
-        this.smoothRotateToAngle(target);
+        const rawAngle = chip.getAttribute('data-angle');
+        if (rawAngle === 'bottom') {
+          this.smoothRotateToAngle(0, Math.PI * 0.80);
+        } else {
+          const target = parseFloat(rawAngle);
+          this.smoothRotateToAngle(target, Math.PI * 0.46);
+        }
+      });
+    });
+
+    // Bottom Stamp Brand Selector (Toppia / GoCase)
+    const brandButtons = document.querySelectorAll('.brand-opt-btn');
+    brandButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        brandButtons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const brand = btn.getAttribute('data-stamp-brand');
+        if (this.cupModel && typeof this.cupModel.setBottomStampBrand === 'function') {
+          this.cupModel.setBottomStampBrand(brand);
+        }
       });
     });
 
@@ -277,21 +301,39 @@ class TumblerProductApp {
     }
   }
 
-  smoothRotateToAngle(targetDeg) {
+  smoothRotateToAngle(targetDeg, targetPolar = null) {
     this.setPlayState(false);
     this.targetAngleDeg = (targetDeg % 360 + 360) % 360;
+    this.targetPolarRad = targetPolar;
   }
 
   syncActivePerspectiveChip() {
     const chips = document.querySelectorAll('.chip-btn');
     const rounded = Math.round(this.currentAngleDeg);
+    const polar = this.studioScene.controls ? this.studioScene.controls.getPolarAngle() : 0;
+    const isLookingAtBottom = polar > Math.PI * 0.70;
+
+    const brandSelector = document.getElementById('bottom-brand-selector');
+    if (brandSelector) {
+      brandSelector.style.display = isLookingAtBottom ? 'flex' : 'none';
+    }
 
     chips.forEach((chip) => {
-      const angle = parseInt(chip.getAttribute('data-angle'), 10);
-      const diff = Math.abs(rounded - angle);
-      if (diff <= 15 || diff >= 345) {
-        chips.forEach((c) => c.classList.remove('active'));
-        chip.classList.add('active');
+      const rawAngle = chip.getAttribute('data-angle');
+      if (rawAngle === 'bottom') {
+        chip.classList.toggle('active', isLookingAtBottom);
+      } else {
+        if (isLookingAtBottom) {
+          chip.classList.remove('active');
+        } else {
+          const angle = parseInt(rawAngle, 10);
+          const diff = Math.abs(rounded - angle);
+          if (diff <= 15 || diff >= 345) {
+            chip.classList.add('active');
+          } else {
+            chip.classList.remove('active');
+          }
+        }
       }
     });
   }
@@ -299,7 +341,7 @@ class TumblerProductApp {
   animate() {
     requestAnimationFrame(this.animate);
 
-    // 1. Smooth target angle interpolation
+    // 1. Smooth target azimuthal angle interpolation
     if (this.targetAngleDeg !== null && this.studioScene.controls) {
       const currentRad = this.studioScene.controls.getAzimuthalAngle();
       const currentDeg = ((-currentRad * 180 / Math.PI) % 360 + 360) % 360;
@@ -319,19 +361,34 @@ class TumblerProductApp {
         this.setCameraAzimuth(newRad);
       }
     }
-    // 2. Continuous smooth auto-spin if toggled
+
+    // 2. Smooth target polar angle interpolation
+    if (this.targetPolarRad !== null && this.studioScene.controls) {
+      const currentPolar = this.studioScene.controls.getPolarAngle();
+      const diffPolar = this.targetPolarRad - currentPolar;
+
+      if (Math.abs(diffPolar) < 0.015) {
+        this.setCameraPolar(this.targetPolarRad);
+        this.targetPolarRad = null;
+      } else {
+        const newPolar = currentPolar + diffPolar * 0.12;
+        this.setCameraPolar(newPolar);
+      }
+    }
+
+    // 3. Continuous smooth auto-spin if toggled
     else if (this.isPlaying && this.studioScene.controls) {
       const currentRad = this.studioScene.controls.getAzimuthalAngle();
       const newRad = currentRad - (this.rotationSpeed * Math.PI / 180);
       this.setCameraAzimuth(newRad);
     }
 
-    // 3. Update orbit damping
+    // 4. Update orbit damping
     if (this.studioScene.controls) {
       this.studioScene.controls.update();
     }
 
-    // 4. Render scene
+    // 5. Render scene
     this.studioScene.renderer.render(this.studioScene.scene, this.studioScene.camera);
   }
 
@@ -345,6 +402,19 @@ class TumblerProductApp {
     camera.position.x = target.x + distance * Math.sin(polarAngle) * Math.sin(azimuthRad);
     camera.position.z = target.z + distance * Math.sin(polarAngle) * Math.cos(azimuthRad);
     camera.position.y = target.y + distance * Math.cos(polarAngle);
+    camera.lookAt(target);
+  }
+
+  setCameraPolar(polarRad) {
+    if (!this.studioScene.controls) return;
+    const camera = this.studioScene.camera;
+    const target = this.studioScene.controls.target;
+    const distance = camera.position.distanceTo(target);
+    const azimuthRad = this.studioScene.controls.getAzimuthalAngle();
+
+    camera.position.x = target.x + distance * Math.sin(polarRad) * Math.sin(azimuthRad);
+    camera.position.z = target.z + distance * Math.sin(polarRad) * Math.cos(azimuthRad);
+    camera.position.y = target.y + distance * Math.cos(polarRad);
     camera.lookAt(target);
   }
 }

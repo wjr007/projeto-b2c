@@ -95,18 +95,39 @@
         <section class="config-section">
           <div class="section-label-row">
             <span class="section-label">COR DO COPO:</span>
-            <span id="selected-color-name" class="section-value">Verde Cargill (Edição Oficial)</span>
+            <span id="selected-color-name" class="section-value">Brasil Hexa (Edição Copa 360°)</span>
           </div>
 
           <div class="swatches-grid" id="product-color-swatches">
+            <!-- Brasil Hexa (Edição Copa 360° - Arte Copo 360 copa.jpg) -->
+            <button class="swatch-btn active" data-variation="copa" title="Brasil Hexa (Edição Copa 360°)">
+              <span class="swatch-color" style="background: linear-gradient(135deg, #ffdf00 0%, #009c3b 50%, #002776 100%);"></span>
+            </button>
+            <!-- Rubro-Negro (CRF Edição Especial) -->
+            <button class="swatch-btn" data-variation="rubroNegro" title="Rubro-Negro CRF (Edição Especial)">
+              <span class="swatch-color" style="background: linear-gradient(180deg, #111215 0%, #ba0c2f 35%, #111215 65%, #ba0c2f 100%);"></span>
+            </button>
             <!-- Cargill Artwork -->
-            <button class="swatch-btn active" data-variation="cargill" title="Verde Cargill (Oficial)">
+            <button class="swatch-btn" data-variation="cargill" title="Verde Cargill (Oficial)">
               <span class="swatch-color swatch-cargill"></span>
+            </button>
+            <!-- Luxury Botanical -->
+            <button class="swatch-btn" data-variation="luxuryBotanical" title="Botânico Luxo & Ouro">
+              <span class="swatch-color swatch-botanical"></span>
+            </button>
+            <!-- Cyber Aurora -->
+            <button class="swatch-btn" data-variation="cyberAurora" title="Aurora Neon Cyberpunk">
+              <span class="swatch-color swatch-cyber"></span>
+            </button>
+            <!-- Gold Marble -->
+            <button class="swatch-btn" data-variation="goldMarble" title="Mármore Calacatta & Ouro">
+              <span class="swatch-color swatch-marble"></span>
             </button>
             <!-- Matte Black -->
             <button class="swatch-btn" data-variation="matteBlack" title="Preto Fosco">
               <span class="swatch-color" style="background: #1c1d21;"></span>
             </button>
+
             <!-- Gloss White -->
             <button class="swatch-btn" data-variation="glossWhite" title="Branco Neve">
               <span class="swatch-color" style="background: #f8fafc; border: 1px solid #cbd5e1;"></span>
@@ -237,6 +258,13 @@
             <span>Arraste para girar em todos os ângulos • Role para zoom</span>
           </div>
 
+          <!-- Bottom Brand Preset Selector (revealed when looking at bottom) -->
+          <div class="bottom-brand-selector" id="bottom-brand-selector" style="display: none;">
+            <span class="brand-sel-label">Padrão do Fundo:</span>
+            <button class="brand-opt-btn active" data-stamp-brand="toppia">Toppia</button>
+            <button class="brand-opt-btn" data-stamp-brand="gocase">GoCase</button>
+          </div>
+
           <!-- Bottom Angle Quick Chips (E-commerce Perspectives) -->
           <div class="perspective-chips-dock">
             <button class="chip-btn active" data-angle="0">
@@ -250,6 +278,9 @@
             </button>
             <button class="chip-btn" data-angle="270">
               <span>270° Lateral</span>
+            </button>
+            <button class="chip-btn" data-angle="bottom" id="chip-btn-bottom" title="Visualizar fundo com gravação a laser">
+              <span>Ver Fundo</span>
             </button>
           </div>
 
