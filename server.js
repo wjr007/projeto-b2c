@@ -24,7 +24,11 @@ const MIME_TYPES = {
   '.csv': 'text/csv; charset=utf-8',
   '.zip': 'application/zip',
   '.txt': 'text/plain; charset=utf-8',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.glb': 'model/gltf-binary',
+  '.gltf': 'model/gltf+json',
+  '.mp4': 'video/mp4',
+  '.webp': 'image/webp'
 };
 
 const server = http.createServer((req, res) => {

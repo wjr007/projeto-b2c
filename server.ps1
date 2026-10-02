@@ -32,7 +32,11 @@ $mimeMap = @{
     ".svg"  = "image/svg+xml";
     ".csv"  = "text/csv; charset=utf-8";
     ".zip"  = "application/zip";
-    ".txt"  = "text/plain; charset=utf-8"
+    ".txt"  = "text/plain; charset=utf-8";
+    ".glb"  = "model/gltf-binary";
+    ".gltf" = "model/gltf+json";
+    ".mp4"  = "video/mp4";
+    ".webp" = "image/webp"
 }
 
 $root = $PSScriptRoot
