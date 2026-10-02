@@ -28,8 +28,8 @@ export class GlbCupModel {
     this.footDeltaY = this.footCutoffY * (1.0 - this.footScaleY);
 
     this.rimY = 0.8540 - this.footDeltaY;       // Cleanly below mouth rim groove line
-    this.baseY = 0.1690 - this.footDeltaY;      // Where printed design meets bead ring
     this.steelFootY = 0.1480 * this.footScaleY; // Brushed stainless steel foot transition
+    this.baseY = this.steelFootY + 0.0065;      // Slim, refined accent border (~1.0 mm vertical thickness)
 
     if (this.bodyTexture) {
       this.bodyTexture.wrapS = THREE.RepeatWrapping;
@@ -452,19 +452,17 @@ export class GlbCupModel {
         this.innerCavityMesh.name = 'GlbUnifiedRimCavity';
         this.group.add(this.innerCavityMesh);
 
-        // 4c. Authentic Physical Base Bead Ring (Borda/anel de ressalto saliente antes da base)
+        // 4c. Sleek, Refined Base Accent Ring (Subtle hairline transition before stainless steel foot)
         const beadBaseY = this.steelFootY;
         const beadTopY = this.baseY;
         const beadH = beadTopY - beadBaseY;
         const beadMidY = (beadBaseY + beadTopY) * 0.5;
         const beadRingPoints = [
-          new THREE.Vector2(0.2110, beadBaseY),
-          new THREE.Vector2(0.2180, beadBaseY + beadH * 0.2),
-          new THREE.Vector2(0.2240, beadBaseY + beadH * 0.4),
-          new THREE.Vector2(0.2275, beadMidY),
-          new THREE.Vector2(0.2255, beadBaseY + beadH * 0.65),
-          new THREE.Vector2(0.2210, beadBaseY + beadH * 0.85),
-          new THREE.Vector2(0.2170, beadTopY)
+          new THREE.Vector2(0.2112, beadBaseY),
+          new THREE.Vector2(0.2132, beadBaseY + beadH * 0.25),
+          new THREE.Vector2(0.2155, beadMidY),                // Sleek, delicate bead peak (~0.5 mm protrusion)
+          new THREE.Vector2(0.2142, beadBaseY + beadH * 0.75),
+          new THREE.Vector2(0.2130, beadTopY)
         ];
         const beadRingGeo = new THREE.LatheGeometry(beadRingPoints, 128);
         beadRingGeo.computeVertexNormals();
