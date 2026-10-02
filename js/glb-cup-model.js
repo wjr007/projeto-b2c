@@ -21,9 +21,15 @@ export class GlbCupModel {
     this.group = new THREE.Group();
     this.group.name = 'GlbTumblerRoot';
 
-    this.rimY = 0.8540;      // Lowered cleanly below the mouth rim groove line
-    this.baseY = 0.1690;     // Lowered so design fills down until it touches the start of the bead ring
-    this.steelFootY = 0.1480;// Below bead ring, the cylindrical foot is brushed stainless steel
+    // Vertical proportion adjustment for bottom stainless steel foot:
+    // Authentically shortens the cylindrical foot so it looks sleek and proportional (matching genuine tumblers)
+    this.footCutoffY = 0.158;
+    this.footScaleY = 0.62; // Reduces vertical height of the bottom foot by ~38%
+    this.footDeltaY = this.footCutoffY * (1.0 - this.footScaleY);
+
+    this.rimY = 0.8540 - this.footDeltaY;       // Cleanly below mouth rim groove line
+    this.baseY = 0.1690 - this.footDeltaY;      // Where printed design meets bead ring
+    this.steelFootY = 0.1480 * this.footScaleY; // Brushed stainless steel foot transition
 
     if (this.bodyTexture) {
       this.bodyTexture.wrapS = THREE.RepeatWrapping;
@@ -310,12 +316,22 @@ export class GlbCupModel {
 
         const geo = sourceMesh.geometry.clone();
 
-        // 1. Center the GLB geometry perfectly along the (X=0, Z=0) central axis
+        // 1. Center the GLB geometry and compress bottom foot vertically to authentic proportions
         const posAttr = geo.attributes.position;
         const count = posAttr.count;
         const offsetX = -0.0066;
+        const cutoffY = this.footCutoffY;
+        const scaleY = this.footScaleY;
+        const deltaY = this.footDeltaY;
+
         for (let i = 0; i < count; i++) {
           posAttr.setX(i, posAttr.getX(i) - offsetX);
+          const y = posAttr.getY(i);
+          if (y < cutoffY) {
+            posAttr.setY(i, y * scaleY);
+          } else {
+            posAttr.setY(i, y - deltaY);
+          }
         }
         geo.computeVertexNormals();
 
@@ -323,9 +339,9 @@ export class GlbCupModel {
         const indexAttr = geo.index;
         const indices = indexAttr.array;
         const normAttr = geo.attributes.normal;
-        const lidCutoffY = 0.925;
-        const bodyYMin = this.baseY; // 0.168 (touches the bead ring)
-        const bodyYMax = this.rimY;  // 0.862 (cleanly below steel mouth rim line)
+        const lidCutoffY = 0.925 - deltaY;
+        const bodyYMin = this.baseY; // touches the bead ring
+        const bodyYMax = this.rimY;  // cleanly below steel mouth rim line
 
         const unindexedPositions = [];
         const unindexedNormals = [];
@@ -341,8 +357,8 @@ export class GlbCupModel {
           const y2 = posAttr.getY(i2);
           const yAvg = (y0 + y1 + y2) / 3;
 
-          // Keep strictly cup triangles (OMIT THE LID COMPLETELY)
-          if (yAvg >= lidCutoffY) continue;
+          // Keep cup body triangles up to the start of the stainless steel collar (encapsulating top edge)
+          if (yAvg >= this.rimY + 0.008) continue;
 
           const x0 = posAttr.getX(i0), z0 = posAttr.getZ(i0);
           const x1 = posAttr.getX(i1), z1 = posAttr.getZ(i1);
@@ -398,43 +414,57 @@ export class GlbCupModel {
         this.cupMesh.name = 'GlbOpenCupMesh';
         this.group.add(this.cupMesh);
 
-        // 4. Polished Brushed Stainless Steel Mouth Rim Cap
-        const rimCapGeo = new THREE.RingGeometry(0.2765, 0.2865, 128);
-        this.rimCapMesh = new THREE.Mesh(rimCapGeo, this.rimCapMaterial);
-        this.rimCapMesh.name = 'GlbRimCap';
-        this.rimCapMesh.rotation.x = -Math.PI / 2;
-        this.rimCapMesh.position.set(0, lidCutoffY, 0);
-        this.group.add(this.rimCapMesh);
-
-        // 4b. Authentic Double-Wall Brushed Stainless Steel Interior Cavity
+        // 4. Unified Seamless Stainless Steel Interior Cavity, Rounded Lip & Top Collar
+        // Models the entire interior, rounded mouth rim crest, and exterior metal band as a single continuous piece.
+        // Completely eliminates all cracks, z-fighting, and jagged artifacts at the mouth rim!
         const innerProfile = [
-          new THREE.Vector2(0.000, 0.095),
-          new THREE.Vector2(0.120, 0.095),
-          new THREE.Vector2(0.130, 0.091),
-          new THREE.Vector2(0.142, 0.098),
-          new THREE.Vector2(0.175, 0.098),
-          new THREE.Vector2(0.186, 0.112),
-          new THREE.Vector2(0.198, 0.200),
-          new THREE.Vector2(0.226, 0.450),
-          new THREE.Vector2(0.252, 0.700),
-          new THREE.Vector2(0.270, 0.880),
-          new THREE.Vector2(0.2765, lidCutoffY)
+          // 4a. Double-wall insulated cavity floor
+          new THREE.Vector2(0.000, 0.095 * scaleY),
+          new THREE.Vector2(0.120, 0.095 * scaleY),
+          new THREE.Vector2(0.130, 0.091 * scaleY),
+          new THREE.Vector2(0.142, 0.098 * scaleY),
+          new THREE.Vector2(0.175, 0.098 * scaleY),
+          new THREE.Vector2(0.186, 0.112 * scaleY),
+
+          // 4b. Interior cavity wall tapering smoothly upward
+          new THREE.Vector2(0.198, 0.200 - deltaY),
+          new THREE.Vector2(0.226, 0.450 - deltaY),
+          new THREE.Vector2(0.252, 0.700 - deltaY),
+          new THREE.Vector2(0.268, 0.810 - deltaY),
+          new THREE.Vector2(0.2745, lidCutoffY - 0.012),
+          new THREE.Vector2(0.2770, lidCutoffY - 0.004),
+
+          // 4c. Continuous smoothly rounded mouth rim crest (eliminates jagged edges from above)
+          new THREE.Vector2(0.2795, lidCutoffY + 0.002),
+          new THREE.Vector2(0.2825, lidCutoffY + 0.0045), // Top rounded lip crest apex
+          new THREE.Vector2(0.2855, lidCutoffY + 0.003),
+          new THREE.Vector2(0.2880, lidCutoffY - 0.001),  // Outer rim crest corner
+
+          // 4d. Exterior brushed stainless steel collar descending down over cup body
+          new THREE.Vector2(0.2878, lidCutoffY - 0.015),
+          new THREE.Vector2(0.2868, lidCutoffY - 0.035),
+          new THREE.Vector2(0.2852, this.rimY - 0.003),   // Clean overlap with printed wrap
+          new THREE.Vector2(0.2835, this.rimY - 0.004)    // Sealed bottom edge
         ];
-        const innerCavityGeo = new THREE.LatheGeometry(innerProfile, 96);
+        const innerCavityGeo = new THREE.LatheGeometry(innerProfile, 128);
+        innerCavityGeo.computeVertexNormals();
         this.innerCavityMesh = new THREE.Mesh(innerCavityGeo, this.rimCapMaterial);
-        this.innerCavityMesh.name = 'GlbInnerCavity';
+        this.innerCavityMesh.name = 'GlbUnifiedRimCavity';
         this.group.add(this.innerCavityMesh);
 
         // 4c. Authentic Physical Base Bead Ring (Borda/anel de ressalto saliente antes da base)
+        const beadBaseY = this.steelFootY;
+        const beadTopY = this.baseY;
+        const beadH = beadTopY - beadBaseY;
+        const beadMidY = (beadBaseY + beadTopY) * 0.5;
         const beadRingPoints = [
-          new THREE.Vector2(0.2100, 0.144),
-          new THREE.Vector2(0.2160, 0.148),
-          new THREE.Vector2(0.2225, 0.153),
-          new THREE.Vector2(0.2280, 0.158),
-          new THREE.Vector2(0.2305, 0.162), // Peak of bead ring
-          new THREE.Vector2(0.2285, 0.166),
-          new THREE.Vector2(0.2245, 0.169),
-          new THREE.Vector2(0.2180, 0.171)
+          new THREE.Vector2(0.2110, beadBaseY),
+          new THREE.Vector2(0.2180, beadBaseY + beadH * 0.2),
+          new THREE.Vector2(0.2240, beadBaseY + beadH * 0.4),
+          new THREE.Vector2(0.2275, beadMidY),
+          new THREE.Vector2(0.2255, beadBaseY + beadH * 0.65),
+          new THREE.Vector2(0.2210, beadBaseY + beadH * 0.85),
+          new THREE.Vector2(0.2170, beadTopY)
         ];
         const beadRingGeo = new THREE.LatheGeometry(beadRingPoints, 128);
         beadRingGeo.computeVertexNormals();
@@ -453,7 +483,7 @@ export class GlbCupModel {
         // Standard tumbler height ~16.8 cm
         const targetHeight = 16.8;
         this.group.scale.setScalar(targetHeight);
-        this.group.position.y = -targetHeight * 0.46;
+        this.group.position.y = -targetHeight * (lidCutoffY * 0.5);
 
         console.log('GlbCupModel loaded successfully from travel mug 3d model.glb WITHOUT lid.');
         if (this.onLoaded) this.onLoaded(this);
