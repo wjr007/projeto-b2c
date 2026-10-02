@@ -357,12 +357,19 @@ export class GlbCupModel {
           const y2 = posAttr.getY(i2);
           const yAvg = (y0 + y1 + y2) / 3;
 
-          // Keep cup body triangles up to the start of the stainless steel collar (encapsulating top edge)
-          if (yAvg >= this.rimY + 0.008) continue;
+          // 1. Keep strictly outer cup body triangles below rimY (encapsulated cleanly by outer rim collar)
+          if (yAvg >= this.rimY) continue;
 
           const x0 = posAttr.getX(i0), z0 = posAttr.getZ(i0);
           const x1 = posAttr.getX(i1), z1 = posAttr.getZ(i1);
           const x2 = posAttr.getX(i2), z2 = posAttr.getZ(i2);
+
+          const r0 = Math.sqrt(x0 * x0 + z0 * z0);
+          const r1 = Math.sqrt(x1 * x1 + z1 * z1);
+          const r2 = Math.sqrt(x2 * x2 + z2 * z2);
+
+          // 2. Discard all internal ledge and lid scan fragments from the raw GLB model
+          if (yAvg > 0.65 && (r0 < 0.268 || r1 < 0.268 || r2 < 0.268)) continue;
 
           let u0 = Math.atan2(x0, z0) / (2 * Math.PI) + 0.5;
           let u1 = Math.atan2(x1, z1) / (2 * Math.PI) + 0.5;
@@ -414,39 +421,42 @@ export class GlbCupModel {
         this.cupMesh.name = 'GlbOpenCupMesh';
         this.group.add(this.cupMesh);
 
-        // 4. Unified Seamless Stainless Steel Interior Cavity, Rounded Lip & Top Collar
-        // Models the entire interior, rounded mouth rim crest, and exterior metal band as a single continuous piece.
-        // Completely eliminates all cracks, z-fighting, and jagged artifacts at the mouth rim!
+        // 4. Pristine Stainless Steel Cavity with Clean Concentric Dividing Line & Emboss Ring
+        // Replicates the exact clean concentric geometry of the authentic reference (100% free of fragments)
         const innerProfile = [
-          // 4a. Double-wall insulated cavity floor
-          new THREE.Vector2(0.000, 0.095 * scaleY),
-          new THREE.Vector2(0.120, 0.095 * scaleY),
-          new THREE.Vector2(0.130, 0.091 * scaleY),
-          new THREE.Vector2(0.142, 0.098 * scaleY),
-          new THREE.Vector2(0.175, 0.098 * scaleY),
-          new THREE.Vector2(0.186, 0.112 * scaleY),
+          // 4a. Interior floor with raised concentric emboss ring (visible in reference print)
+          new THREE.Vector2(0.000, 0.052),
+          new THREE.Vector2(0.095, 0.052),
+          new THREE.Vector2(0.108, 0.058), // Crisp circular inner emboss ring
+          new THREE.Vector2(0.118, 0.052),
+          new THREE.Vector2(0.165, 0.052),
+          new THREE.Vector2(0.180, 0.062), // Floor to wall curved fillet
 
-          // 4b. Interior cavity wall tapering smoothly upward
-          new THREE.Vector2(0.198, 0.200 - deltaY),
-          new THREE.Vector2(0.226, 0.450 - deltaY),
-          new THREE.Vector2(0.252, 0.700 - deltaY),
-          new THREE.Vector2(0.268, 0.810 - deltaY),
-          new THREE.Vector2(0.2745, lidCutoffY - 0.012),
-          new THREE.Vector2(0.2770, lidCutoffY - 0.004),
+          // 4b. Smooth continuous conical interior wall
+          new THREE.Vector2(0.198, 0.150),
+          new THREE.Vector2(0.226, 0.400),
+          new THREE.Vector2(0.252, 0.650),
+          new THREE.Vector2(0.264, 0.760),
+          new THREE.Vector2(0.2670, this.rimY),
 
-          // 4c. Continuous smoothly rounded mouth rim crest (eliminates jagged edges from above)
-          new THREE.Vector2(0.2795, lidCutoffY + 0.002),
-          new THREE.Vector2(0.2825, lidCutoffY + 0.0045), // Top rounded lip crest apex
-          new THREE.Vector2(0.2855, lidCutoffY + 0.003),
-          new THREE.Vector2(0.2880, lidCutoffY - 0.001),  // Outer rim crest corner
+          // 4c. Clean single circular dividing line (stepped interior rim groove requested by user)
+          new THREE.Vector2(0.2695, this.rimY + 0.006), // Crisp horizontal dividing step
+          new THREE.Vector2(0.2710, lidCutoffY - 0.015),// Internal stepped ledge wall
+          new THREE.Vector2(0.2735, lidCutoffY - 0.004),// Internal mouth bevel
 
-          // 4d. Exterior brushed stainless steel collar descending down over cup body
-          new THREE.Vector2(0.2878, lidCutoffY - 0.015),
-          new THREE.Vector2(0.2868, lidCutoffY - 0.035),
-          new THREE.Vector2(0.2852, this.rimY - 0.003),   // Clean overlap with printed wrap
-          new THREE.Vector2(0.2835, this.rimY - 0.004)    // Sealed bottom edge
+          // 4d. Smooth continuous rounded mouth crown lip
+          new THREE.Vector2(0.2760, lidCutoffY + 0.0020),
+          new THREE.Vector2(0.2795, lidCutoffY + 0.0045), // Top rounded lip crown apex
+          new THREE.Vector2(0.2830, lidCutoffY + 0.0030),
+          new THREE.Vector2(0.2855, lidCutoffY),          // Outer rim shoulder
+
+          // 4e. Exterior brushed stainless steel collar descending down over cup body
+          new THREE.Vector2(0.2855, lidCutoffY - 0.015),
+          new THREE.Vector2(0.2848, lidCutoffY - 0.035),
+          new THREE.Vector2(0.2838, this.rimY - 0.002),   // Overlaps printed wrap smoothly
+          new THREE.Vector2(0.2820, this.rimY - 0.003)    // Sealed bottom edge
         ];
-        const innerCavityGeo = new THREE.LatheGeometry(innerProfile, 128);
+        const innerCavityGeo = new THREE.LatheGeometry(innerProfile, 160);
         innerCavityGeo.computeVertexNormals();
         this.innerCavityMesh = new THREE.Mesh(innerCavityGeo, this.rimCapMaterial);
         this.innerCavityMesh.name = 'GlbUnifiedRimCavity';
