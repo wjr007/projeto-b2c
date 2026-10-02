@@ -1,0 +1,21 @@
+{
+  "name": "copo-personalizado-3d",
+  "version": "1.0.0",
+  "description": "Apresentação 3D de copo térmico personalizado com Three.js e exportação determinística 360° frame a frame",
+  "main": "index.html",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -File server.ps1",
+    "serve": "npx serve ."
+  },
+  "keywords": [
+    "threejs",
+    "3d",
+    "product-viewer",
+    "tumbler",
+    "cargill",
+    "360-rotation",
+    "frame-export"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copo Térmico Personalizado 473ml | Mostrador 3D 360° B2C</title>
+  <meta name="description" content="Mostrador de produto 3D 360 interativo com personalização em tempo real de gravação de nome e variações de cores.">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Three.js Import Map -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div style="font-weight: 700; font-size: 1.15rem; color: #1e293b; margin-top: 14px;">Carregando Modelo 3D...</div>
+    <div id="loading-status-text" style="font-size: 0.88rem; color: #64748b; margin-top: 4px;">Inicializando texturas e iluminação de estúdio...</div>
+    <div style="width: 240px; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-top: 16px;">
+      <div id="loading-progress-bar" style="width: 25%; height: 100%; background: #ea580c; transition: width 0.3s ease;"></div>
+    </div>
+  </div>
+
+  <!-- Top E-commerce Header -->
+  <header class="ecommerce-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <a href="#" class="brand-logo">
+          <svg class="brand-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+          <span>TUMBLER<strong style="color: #ea580c;">3D</strong></span>
+        </a>
+        <div class="header-breadcrumb">
+          <span>Início</span> / <span>Copos Térmicos</span> / <span class="active">Copo 473ml Personalizado</span>
+        </div>
+      </div>
+
+      <div class="header-perks">
+        <div class="perk-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ea580c" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Aço Inox 304</span>
+        </div>
+        <div class="perk-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ea580c" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>12h Gelado • 6h Quente</span>
+        </div>
+        <div class="perk-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span>Gravação Grátis</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Product Showcase Grid -->
+  <main class="product-page-main">
+    <div class="product-layout-container">
+      
+      <!-- LEFT SIDEBAR: Product Configurator & Options -->
+      <aside class="product-sidebar">
+        <div class="product-tag-row">
+          <span class="badge-featured">DESTAQUE EXCLUSIVO</span>
+          <div class="rating-stars">
+            <span class="stars">★★★★★</span>
+            <span class="rating-count">4.9 (248)</span>
+          </div>
+        </div>
+
+        <h1 class="product-title">Copo Térmico Personalizado 473ml</h1>
+        <p class="product-subtitle">Isolamento a vácuo com parede dupla em aço inoxidável e gravação a laser.</p>
+
+        <div class="price-box">
+          <div class="price-current">R$ 149,90</div>
+          <div class="price-installments">ou 3x de <strong>R$ 49,96</strong> sem juros no cartão</div>
+        </div>
+
+        <!-- PRODUCT COLOR VARIATION SELECTOR -->
+        <section class="config-section">
+          <div class="section-label-row">
+            <span class="section-label">COR DO COPO:</span>
+            <span id="selected-color-name" class="section-value">Verde Cargill (Edição Oficial)</span>
+          </div>
+
+          <div class="swatches-grid" id="product-color-swatches">
+            <!-- Cargill Artwork -->
+            <button class="swatch-btn active" data-variation="cargill" title="Verde Cargill (Oficial)">
+              <span class="swatch-color swatch-cargill"></span>
+            </button>
+            <!-- Matte Black -->
+            <button class="swatch-btn" data-variation="matteBlack" title="Preto Fosco">
+              <span class="swatch-color" style="background: #1c1d21;"></span>
+            </button>
+            <!-- Gloss White -->
+            <button class="swatch-btn" data-variation="glossWhite" title="Branco Neve">
+              <span class="swatch-color" style="background: #f8fafc; border: 1px solid #cbd5e1;"></span>
+            </button>
+            <!-- Navy Blue -->
+            <button class="swatch-btn" data-variation="navyBlue" title="Azul Marinho">
+              <span class="swatch-color" style="background: #1e3a8a;"></span>
+            </button>
+            <!-- Terracotta -->
+            <button class="swatch-btn" data-variation="terracotta" title="Terracota">
+              <span class="swatch-color" style="background: #c2593f;"></span>
+            </button>
+            <!-- Pure Steel -->
+            <button class="swatch-btn" data-variation="pureSteel" title="Aço Inox Escovado">
+              <span class="swatch-color" style="background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 50%, #64748b 100%);"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- "GRAVE SEU NOME" CUSTOMIZATION CARD (Gocase benchmark) -->
+        <section class="personalization-card" id="personalization-card">
+          <div class="pcard-header">
+            <div class="pcard-header-left">
+              <svg class="pencil-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+              </svg>
+              <div>
+                <h3 class="pcard-title">Grave seu nome</h3>
+                <span class="pcard-subtitle">Personalização exclusiva • grátis</span>
+              </div>
+            </div>
+
+            <!-- Checkbox toggle button -->
+            <button type="button" class="pcard-checkbox active" id="btn-toggle-engraving" aria-label="Ativar gravação de nome">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Name Text Input -->
+          <div class="pcard-input-wrapper">
+            <input 
+              type="text" 
+              id="input-engrave-name" 
+              class="pcard-input" 
+              placeholder="Seu Nome" 
+              maxlength="16"
+              autocomplete="off"
+              spellcheck="false"
+              value=""
+            />
+          </div>
+
+          <!-- Name Color Selector -->
+          <div class="pcard-color-row">
+            <span class="pcard-color-label">COR DO NOME:</span>
+            <div class="pcard-colors-list" id="name-color-swatches">
+              <!-- 7 Colors matching the reference image -->
+              <button class="name-color-dot active" data-color="#ffffff" title="Branco" style="--dot-color: #ffffff;"></button>
+              <button class="name-color-dot" data-color="#1f7a68" title="Verde Petróleo" style="--dot-color: #1f7a68;"></button>
+              <button class="name-color-dot" data-color="#5b9cf6" title="Azul Céu" style="--dot-color: #5b9cf6;"></button>
+              <button class="name-color-dot" data-color="#f78da7" title="Rosa Chiclete" style="--dot-color: #f78da7;"></button>
+              <button class="name-color-dot" data-color="#fce300" title="Amarelo" style="--dot-color: #fce300;"></button>
+              <button class="name-color-dot" data-color="#a47858" title="Bronze Caramelo" style="--dot-color: #a47858;"></button>
+              <button class="name-color-dot" data-color="#7a0c23" title="Bordô Vinho" style="--dot-color: #7a0c23;"></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA & Purchase Actions -->
+        <div class="action-buttons-group">
+          <button class="btn-buy-primary" id="btn-add-cart">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Adicionar ao Carrinho
+          </button>
+          <button class="btn-buy-secondary" id="btn-buy-now">
+            Comprar Agora
+          </button>
+        </div>
+
+        <!-- Product Specs Accordion -->
+        <div class="product-benefits-box">
+          <div class="benefit-item">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ea580c" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>Gravação a laser permanente que não desbota</span>
+          </div>
+          <div class="benefit-item">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ea580c" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+            <span>Parede dupla com isolamento a vácuo (anti-suor)</span>
+          </div>
+          <div class="benefit-item">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ea580c" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+            <span>Compatível com porta-copos veiculares padrão</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT / MAIN: 3D Product Interactive Viewer -->
+      <section class="product-viewer-area">
+        <div class="canvas-wrapper">
+          <canvas id="webgl-canvas"></canvas>
+
+          <!-- Top 360 Interactive Badge -->
+          <div class="interactive-360-pill" id="badge-360">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span>360° Interativo • Clique e arraste para girar</span>
+          </div>
+
+          <!-- Interaction Hint Floating Banner -->
+          <div id="interaction-hint" class="interaction-hint">
+            <svg class="hand-drag-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+            </svg>
+            <span>Arraste para girar em todos os ângulos • Role para zoom</span>
+          </div>
+
+          <!-- Bottom Angle Quick Chips (E-commerce Perspectives) -->
+          <div class="perspective-chips-dock">
+            <button class="chip-btn active" data-angle="0">
+              <span>0° Frente</span>
+            </button>
+            <button class="chip-btn" data-angle="90">
+              <span>90° Lateral</span>
+            </button>
+            <button class="chip-btn" data-angle="180" id="chip-btn-back">
+              <span>180° Gravação</span>
+            </button>
+            <button class="chip-btn" data-angle="270">
+              <span>270° Lateral</span>
+            </button>
+          </div>
+
+          <!-- Floating Utility Buttons -->
+          <div class="floating-utilities">
+            <button class="util-btn" id="btn-reset-view" title="Resetar Câmera">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              <span>Resetar</span>
+            </button>
+
+            <button class="util-btn" id="btn-toggle-spin" title="Girar 360° Suave">
+              <svg id="icon-spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <span id="text-spin">Auto-Girar</span>
+            </button>
+
+            <button class="util-btn" id="btn-fullscreen" title="Tela Cheia">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+              </svg>
+              <span>Tela Cheia</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Application Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
